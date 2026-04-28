@@ -1,0 +1,46 @@
+name: Build APK
+
+on:
+  push:
+    paths:
+      - 'webapk.conf'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pwa-asset-generator
+        run: npm install -g pwa-asset-generator
+
+      - name: Clone website-to-apk tool
+        run: git clone https://github.com/Jipok/website-to-apk.git
+
+      - name: Build APK
+        run: |
+          cp webapk.conf website-to-apk/
+          cd website-to-apk
+          ./make.sh build
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-apk
+          path: website-to-apk/app-release.apk
