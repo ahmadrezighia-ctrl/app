@@ -1,0 +1,36 @@
+name: Download Website2APK Builder
+
+on:
+  workflow_dispatch:
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Download Page
+        run: |
+          # دریافت محتوای صفحه دانلود
+          wget -O download.html https://websitetoapk.com/download.html
+          
+          # استخراج لینک مستقیم از صفحه
+          DOWNLOAD_URL=$(grep -oP 'https?://[^"]+\.exe' download.html | head -1)
+          
+          if [ -z "$DOWNLOAD_URL" ]; then
+            DOWNLOAD_URL=$(grep -oP 'https?://[^"\'?]+\.(exe|msi|zip)' download.html | head -1)
+          fi
+          
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+          
+          if [ -n "$DOWNLOAD_URL" ]; then
+            echo "لینک پیدا شد: $DOWNLOAD_URL"
+            wget -O Website2APK_Setup.exe "$DOWNLOAD_URL"
+          else
+            echo "خطا: لینک دانلود پیدا نشد"
+            exit 1
+          fi
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Website2APK-Setup
+          path: Website2APK_Setup.exe
