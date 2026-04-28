@@ -1,0 +1,14 @@
+name: Download HTML Page
+on:
+  workflow_dispatch:
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the page
+        run: wget -O downloaded_page.html https://websitetoapk.com/download.html
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-html-page
+          path: downloaded_page.html
